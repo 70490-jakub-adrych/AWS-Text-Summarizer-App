@@ -6,6 +6,8 @@
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(62, 142, 208, 0.1);
   color: #e6e6e6;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .summarize-title {
@@ -21,6 +23,10 @@
 
 .input-section {
   margin-bottom: 2rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .text-input {
@@ -33,6 +39,9 @@
   font-size: 1rem;
   resize: vertical;
   transition: border 0.3s ease;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto;
 }
 
 .text-input:focus {
@@ -191,4 +200,17 @@
 
 .endpoint-status p {
   margin: 0.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .summarize-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .summarize-container {
+    padding: 1rem;
+  }
 }
