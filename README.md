@@ -19,13 +19,13 @@ The missile knows where it is at all times. It knows this because it knows where
 
 # AWS Text Summarization Application
 
-This application uses AWS services and React to provide text summarization capabilities. Users can sign in using Amazon Cognito, input text, and receive AI-generated summaries powered by a fine-tuned transformer model on SageMaker.
+This application uses AWS services and React to provide text summarization capabilities. Users can sign in using Amazon Cognito, input text, and receive AI-generated summaries powered by a transformer model on SageMaker.
 
 ## Architecture Overview
 
 - **Frontend**: React application with Cognito authentication
 - **Backend**: 
-  - SageMaker endpoint running a fine-tuned BART model
+  - SageMaker endpoint running a distilBART model
   - Lambda function for processing requests
   - API Gateway for secure access
   - Cognito for authentication
@@ -42,15 +42,7 @@ This application uses AWS services and React to provide text summarization capab
 
 ### 1. Cognito Configuration
 
-The application uses an existing Cognito User Pool. Here are the current settings:
-
-- **Region**: eu-north-1
-- **User Pool ID**: eu-north-1_O4CIZM2aJ
-- **App Client ID**: 46g5ig1s03klm5guub0h4qkv2e
-- **Domain**: https://eu-north-1o4cizm2aj.auth.eu-north-1.amazoncognito.com
-- **Callback URL**: https://d3cuf8vpsz3a8w.cloudfront.net/
-
-To create a new Cognito User Pool (if necessary):
+To create a new Cognito User Pool:
 
 1. Navigate to the Amazon Cognito console
 2. Click "Create a User Pool"
@@ -59,35 +51,39 @@ To create a new Cognito User Pool (if necessary):
 5. Set the callback URL to your frontend URL
 6. Note the User Pool ID and App Client ID for your config.js file
 
-### 2. SageMaker Model Training and Deployment
+### 2. SageMaker Model Deployment
 
-The model training is handled through SageMaker using a Jupyter notebook:
+The model can be deployed through SageMaker using a Jupyter notebook or our provided script:
 
 1. Navigate to Amazon SageMaker in the AWS console
 2. Create a new notebook instance with at least ml.t3.medium (free tier eligible)
    - Choose **Python 3 (ipykernel)** as your kernel
    - Ensure the instance role has access to S3 and necessary SageMaker permissions
-3. Upload the files from the `backend/` directory to the notebook instance:
-   - Click the "Upload" button in the Jupyter interface
-   - Select `train.py`, `preprocess.py`, and any other Python files from your local `backend/` directory
-   - Create a `backend/` directory in your notebook instance and place the uploaded files there
-4. Upload `notebooks/model_training.ipynb` to your instance
-5. Open the notebook and ensure you select the Python 3 (ipykernel) kernel
-6. Run each cell in the notebook sequentially to:
-   - Preprocess the CNN/DailyMail dataset (using a very small subset for faster training)
-   - Fine-tune the BART model on free tier compatible instances
-   - Deploy the model to a SageMaker endpoint
+3. Upload the files from the `backend/` directory to the notebook instance
+4. Upload `notebooks/deploy_pretrained_model.ipynb` to your instance
+5. Open the notebook and run each cell sequentially to deploy the model
 
-> **Note:** The notebook has been configured to use AWS Free Tier compatible instance types:
-> - `ml.t3.medium` for processing jobs
-> - `ml.m5.xlarge` for training (free tier includes 50 hours)
+Alternatively, you can use the script in the backend folder:
+
+```bash
+cd backend
+python deploy_pretrained_model.py
+```
+
+> **Note:** The script and notebook are configured for AWS Free Tier compatible instance types:
 > - `ml.m5.xlarge` for inference (free tier includes 125 hours)
 
-> **Note:** If you encounter errors related to instance types or image URIs, make sure all instance type variables are properly defined and that you're providing all required parameters in the `sagemaker.image_uris.retrieve()` function, including `image_scope`, `py_version`, and `instance_type`.
-
-> **Note:** The preprocessing script automatically installs required Python packages (`datasets`, `pandas`, `transformers`) at runtime in the SageMaker container. This may take a few minutes during the first execution.
-
-This process may take several hours and will incur AWS charges for SageMaker usage. GPU-enabled instances (p3 family) are recommended for faster training.
+> **Note:** Remember that running a SageMaker endpoint will incur AWS charges. Use the manage_endpoint.py script to control costs:
+> ```bash
+> # Check endpoint status
+> python manage_endpoint.py status
+> 
+> # Start endpoint
+> python manage_endpoint.py start
+> 
+> # Stop endpoint (deletes the endpoint to prevent charges)
+> python manage_endpoint.py stop
+> ```
 
 ### 3. Lambda and API Gateway Deployment
 
@@ -103,43 +99,49 @@ The serverless backend can be deployed using AWS SAM:
 4. Follow the prompts, providing:
    - Stack name (e.g., `text-summarizer-stack`)
    - AWS region (e.g., `eu-north-1`)
-   - CognitoUserPoolId parameter (`eu-north-1_O4CIZM2aJ`)
-   - SageMakerEndpointName parameter (`summarizer-endpoint`)
+   - CognitoUserPoolId parameter (from step 1)
+   - SageMakerEndpointName parameter (from step 2)
 
 5. After deployment completes, note the API Gateway URL (this will be your API_ENDPOINT)
 
 ### 4. Frontend Configuration and Deployment
 
-1. Ensure the `src/config.js` file has all the correct values:
-   ```js
-   export const AWS_REGION = 'eu-north-1';
-   export const USER_POOL_ID = 'eu-north-1_O4CIZM2aJ';
-   export const USER_POOL_CLIENT_ID = '46g5ig1s03klm5guub0h4qkv2e';
-   export const API_ENDPOINT = 'https://your-api-gateway-url.execute-api.eu-north-1.amazonaws.com/prod';
-   export const COGNITO_DOMAIN = 'https://eu-north-1o4cizm2aj.auth.eu-north-1.amazoncognito.com';
-   export const REDIRECT_URI = 'https://d3cuf8vpsz3a8w.cloudfront.net/';
-   export const S3_BUCKET = 'textsummarizerbucket-test';
-   export const SAGEMAKER_ENDPOINT = 'summarizer-endpoint';
+1. Create a `src/config.js` file based on the example template:
+   ```bash
+   cp src/config-example.js src/config.js
    ```
 
-2. Install dependencies:
+2. Edit the `src/config.js` file with your own values for:
+   - AWS_REGION
+   - USER_POOL_ID
+   - USER_POOL_CLIENT_ID
+   - API_ENDPOINT
+   - REDIRECT_URI
+   - SAGEMAKER_ENDPOINT
+
+3. Install dependencies:
    ```
    npm install
    ```
 
-3. Run locally for testing:
+4. Run locally for testing:
    ```
    npm start
    ```
 
-4. Build and deploy to S3:
+5. Build for deployment:
    ```
-   npm run deploy
+   npm run build
    ```
 
-5. Create CloudFront invalidation to ensure the latest version is served:
+6. Deploy to S3 (replace BUCKET_NAME with your bucket):
    ```
-   aws cloudfront create-invalidation --distribution-id E1IVRZ97YG05C2 --paths "/*"
+   aws s3 sync build/ s3://BUCKET_NAME
+   ```
+
+7. Create CloudFront invalidation (replace DISTRIBUTION_ID with your distribution ID):
+   ```
+   aws cloudfront create-invalidation --distribution-id DISTRIBUTION_ID --paths "/*"
    ```
 
 ## Security Considerations
@@ -148,17 +150,6 @@ The serverless backend can be deployed using AWS SAM:
 - API Gateway endpoints are secured with Cognito authorizers
 - CORS is configured to allow only necessary origins
 - All requests use HTTPS
-
-## CI/CD Integration (Optional)
-
-To set up continuous deployment:
-
-1. Create a CodeCommit repository for your code
-2. Set up an AWS CodePipeline with:
-   - CodeCommit as the source
-   - CodeBuild to build the frontend and backend
-   - CloudFormation for deploying the backend resources
-   - S3 deployment for the frontend
 
 ## Troubleshooting
 
