@@ -1,0 +1,116 @@
+.summarize-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #1a1a2e;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(62, 142, 208, 0.1);
+  color: #e6e6e6;
+}
+
+.summarize-title {
+  color: #00bfff;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  background: linear-gradient(90deg, #00bfff, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.input-section {
+  margin-bottom: 2rem;
+}
+
+.text-input {
+  width: 100%;
+  padding: 1rem;
+  background-color: #16213e;
+  border: 1px solid #3a3a5a;
+  border-radius: 5px;
+  color: #e6e6e6;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border 0.3s ease;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: #00bfff;
+  box-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
+}
+
+.summarize-btn {
+  background: linear-gradient(90deg, #00bfff, #0080ff);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summarize-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 128, 255, 0.3);
+}
+
+.summarize-btn:disabled {
+  background: #3a3a5a;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.error-message {
+  color: #ff6b6b;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: rgba(255, 107, 107, 0.1);
+  border-radius: 5px;
+}
+
+.result-section {
+  padding: 1.5rem;
+  background-color: #16213e;
+  border-radius: 8px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-section h3 {
+  color: #00bfff;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.summary-box {
+  background-color: #1a1a2e;
+  border-left: 3px solid #00bfff;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0 5px 5px 0;
+}
+
+.download-btn {
+  background: linear-gradient(90deg, #9333ea, #6366f1);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(147, 51, 234, 0.3);
+}

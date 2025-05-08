@@ -128,4 +128,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Configuration with secrets
+src/config.js
+
 node_modules
+/build
+cmds
