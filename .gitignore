@@ -135,3 +135,4 @@ src/config.js
 node_modules
 /build
 cmds
+myhelpfile.txt
