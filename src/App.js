@@ -91,7 +91,10 @@ function App() {
         </main>
         
         <footer className="app-footer">
-          <p>© 2023 AWS Text Summarization App | Using SageMaker and Cognito</p>
+          <p>© 2025 AWS Text Summarization App | Using SageMaker and Cognito
+          <br />
+          Uniwersytet WSB Merito | Gdańsk
+          </p>
         </footer>
       </div>
     );
