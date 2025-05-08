@@ -1,0 +1,8 @@
+
+npm run build
+
+aws s3 sync build/ s3://textsummarizerbucket-test --acl public-read
+
+aws cloudfront create-invalidation --distribution-id E1IVRZ97YG05C2 --paths "/*"
+
+aws configure
