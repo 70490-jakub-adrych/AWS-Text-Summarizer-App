@@ -2,6 +2,8 @@
 
 import { useAuth } from "react-oidc-context";
 import { useEffect } from "react";
+import Summarize from "./components/Summarize";
+import './App.css';
 
 function App() {
   const auth = useAuth();
@@ -46,39 +48,62 @@ function App() {
   };
 
   if (auth.isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading">
+        <h2>Loading...</h2>
+        <p>Please wait while we authenticate you</p>
+      </div>
+    );
   }
 
   if (auth.error) {
     // Display error but with a recovery option
     return (
-      <div>
-        <p>Authentication error occurred: {auth.error.message}</p>
-        <button onClick={() => auth.signinRedirect()}>Try signing in again</button>
+      <div className="error">
+        <h2>Authentication Error</h2>
+        <p>Error: {auth.error.message}</p>
+        <button className="auth-button" onClick={() => auth.signinRedirect()}>Try signing in again</button>
       </div>
     );
   }
 
   if (auth.isAuthenticated) {
     return (
-      <div>
-        <pre> Hello: {auth.user?.profile.email} </pre>
-        <pre> ID Token: {auth.user?.id_token} </pre>
-        <pre> Access Token: {auth.user?.access_token} </pre>
-        <pre> Refresh Token: {auth.user?.refresh_token} </pre>
-
-        <button onClick={() => {
-          localStorage.removeItem("wasLoggedIn");
-          auth.removeUser();
-        }}>Sign out</button>
+      <div className="app-container">
+        <header className="app-header">
+          <h1>Text Summarizer</h1>
+          <div className="user-info">
+            <span>Welcome, {auth.user?.profile.email}</span>
+            <button 
+              className="auth-button logout"
+              onClick={() => {
+                localStorage.removeItem("wasLoggedIn");
+                auth.removeUser();
+              }}
+            >
+              Sign out
+            </button>
+          </div>
+        </header>
+        
+        <main>
+          <Summarize idToken={auth.user?.id_token} />
+        </main>
+        
+        <footer className="app-footer">
+          <p>© 2023 AWS Text Summarization App | Using SageMaker and Cognito</p>
+        </footer>
       </div>
     );
   }
 
   return (
-    <div>
-      <button onClick={() => auth.signinRedirect()}>Sign in</button>
-      <button onClick={() => signOutRedirect()}>Sign out</button>
+    <div className="app-container login">
+      <div className="login-panel">
+        <h1>Text Summarizer</h1>
+        <p>Please sign in to continue</p>
+        <button className="auth-button" onClick={() => auth.signinRedirect()}>Sign in</button>
+      </div>
     </div>
   );
 }

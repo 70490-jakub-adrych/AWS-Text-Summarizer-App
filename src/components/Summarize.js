@@ -8,6 +8,9 @@ const Summarize = ({ idToken }) => {
   const [summary, setSummary] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [debug, setDebug] = useState(null);
+  const [progress, setProgress] = useState(0); // Add loading progress indicator
+  const [endpointStatus, setEndpointStatus] = useState('unknown');
 
   const handleSummarize = async () => {
     if (!inputText.trim()) {
@@ -18,24 +21,105 @@ const Summarize = ({ idToken }) => {
     setIsLoading(true);
     setSummary('');
     setError(null);
+    setDebug(null);
+    setProgress(10); // Start progress indication
+
+    // Check if text is too long and show warning
+    if (inputText.length > 10000) {
+      setError('Warning: Long texts may take more time to process or time out. Consider using a shorter text for better results.');
+    }
+
+    // Start a progress timer to give user feedback during long operations
+    const progressTimer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(progressTimer);
+          return 90;
+        }
+        return prev + 5;
+      });
+    }, 1000);
 
     try {
+      console.log('Sending request to:', `${API_ENDPOINT}/summarize`);
+      console.log('Input text length:', inputText.length);
+      
+      // Simple, clean payload
+      const payload = { text: inputText.trim() };
+      
       const response = await fetch(`${API_ENDPOINT}/summarize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
+          'Authorization': `Bearer ${idToken || ''}`,
         },
-        body: JSON.stringify({ text: inputText })
+        body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      // Get the response text
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+      
+      // Clear the progress timer
+      clearInterval(progressTimer);
+      setProgress(100);
+      
+      // Parse the response
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error(`Failed to parse response as JSON: ${responseText}`);
       }
+      
+      // Save the debug info
+      setDebug(JSON.stringify(data, null, 2));
 
-      const data = await response.json();
-      setSummary(data.summary);
+      // Check for endpoint-related errors
+      if (data.error && 
+         (data.error.includes("Could not find endpoint") || 
+          data.error.includes("Endpoint not available") || 
+          data.error.includes("is not available"))) {
+        setEndpointStatus('stopped');
+        throw new Error("The summarization service is currently offline. Please try again later when the service is reactivated.");
+      } else {
+        setEndpointStatus('running');
+      }
+      
+      // Handle success or error based on status code
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${data.error || response.statusText}`);
+      }
+      
+      // Extract the summary - handle both direct and nested formats
+      let summaryText = '';
+      
+      // Check if we have a nested body that's a string
+      if (data.body && typeof data.body === 'string') {
+        try {
+          // Try to parse the nested body
+          const bodyData = JSON.parse(data.body);
+          if (bodyData.summary) {
+            summaryText = bodyData.summary;
+          }
+        } catch (e) {
+          console.error('Failed to parse body as JSON:', e);
+        }
+      } 
+      // If we didn't get a summary from the nested body, check if it's directly in the data
+      else if (data.summary) {
+        summaryText = data.summary;
+      }
+      
+      if (summaryText) {
+        setSummary(summaryText);
+        console.log('Setting summary:', summaryText);
+      } else {
+        throw new Error('Could not find summary in response');
+      }
     } catch (err) {
+      clearInterval(progressTimer);
+      setProgress(0);
       setError(`Failed to summarize: ${err.message}`);
       console.error('Summarization error:', err);
     } finally {
@@ -70,6 +154,13 @@ const Summarize = ({ idToken }) => {
     <div className="summarize-container">
       <h2 className="summarize-title">Text Summarizer</h2>
       
+      {endpointStatus === 'stopped' && (
+        <div className="endpoint-status warning">
+          <p>⚠️ The summarization service is currently offline to save costs.</p>
+          <p>Contact the administrator to restart the service when needed.</p>
+        </div>
+      )}
+      
       <div className="input-section">
         <textarea
           className="text-input"
@@ -86,9 +177,33 @@ const Summarize = ({ idToken }) => {
         >
           {isLoading ? 'Summarizing...' : 'Summarize'}
         </button>
+        
+        {/* Add character count indicator */}
+        <div className="char-counter">
+          Character count: {inputText.length} 
+          {inputText.length > 5000 ? 
+            <span className="warning"> (Long texts may take longer to process)</span> : 
+            ''}
+        </div>
       </div>
 
+      {isLoading && (
+        <div className="progress-container">
+          <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+          <div className="progress-text">Processing... This may take up to 30 seconds for long texts</div>
+        </div>
+      )}
+
       {error && <div className="error-message">{error}</div>}
+      
+      {debug && (
+        <div className="debug-info">
+          <details>
+            <summary>Debug Information</summary>
+            <pre>{debug}</pre>
+          </details>
+        </div>
+      )}
 
       {summary && (
         <div className="result-section">

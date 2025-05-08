@@ -114,3 +114,81 @@
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(147, 51, 234, 0.3);
 }
+
+.debug-info {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 5px;
+  background-color: #16213e;
+}
+
+.debug-info details {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.debug-info summary {
+  cursor: pointer;
+  color: #00bfff;
+  font-weight: bold;
+}
+
+.debug-info pre {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #0a0a1a;
+  border-radius: 4px;
+  overflow-x: auto;
+  color: #e6e6e6;
+}
+
+.char-counter {
+  color: #888;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+.char-counter .warning {
+  color: #ff9800;
+}
+
+.progress-container {
+  background-color: #16213e;
+  border-radius: 5px;
+  height: 10px;
+  margin: 1rem 0;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #00bfff, #9333ea);
+  height: 100%;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.progress-text {
+  color: #888;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.endpoint-status {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.endpoint-status.warning {
+  background-color: rgba(255, 152, 0, 0.1);
+  border-left: 4px solid #ff9800;
+}
+
+.endpoint-status p {
+  margin: 0.5rem 0;
+}
