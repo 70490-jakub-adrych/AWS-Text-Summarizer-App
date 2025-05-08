@@ -2,8 +2,6 @@
 
 import { useAuth } from "react-oidc-context";
 import { useEffect } from "react";
-import Summarize from "./components/Summarize";
-import "./App.css";
 
 function App() {
   const auth = useAuth();
@@ -48,56 +46,39 @@ function App() {
   };
 
   if (auth.isLoading) {
-    return <div className="app-container loading">Loading...</div>;
+    return <div>Loading...</div>;
   }
 
   if (auth.error) {
     // Display error but with a recovery option
     return (
-      <div className="app-container error">
+      <div>
         <p>Authentication error occurred: {auth.error.message}</p>
-        <button className="auth-button" onClick={() => auth.signinRedirect()}>Try signing in again</button>
+        <button onClick={() => auth.signinRedirect()}>Try signing in again</button>
       </div>
     );
   }
 
   if (auth.isAuthenticated) {
     return (
-      <div className="app-container authenticated">
-        <header className="app-header">
-          <h1>Text Summarization App</h1>
-          <div className="user-info">
-            <span>Welcome, {auth.user?.profile.email}</span>
-            <button 
-              className="auth-button logout" 
-              onClick={() => {
-                localStorage.removeItem("wasLoggedIn");
-                auth.removeUser();
-              }}
-            >
-              Sign out
-            </button>
-          </div>
-        </header>
-        
-        <main>
-          <Summarize idToken={auth.user?.id_token} />
-        </main>
-        
-        <footer className="app-footer">
-          <p>&copy; {new Date().getFullYear()} AWS Text Summarizer</p>
-        </footer>
+      <div>
+        <pre> Hello: {auth.user?.profile.email} </pre>
+        <pre> ID Token: {auth.user?.id_token} </pre>
+        <pre> Access Token: {auth.user?.access_token} </pre>
+        <pre> Refresh Token: {auth.user?.refresh_token} </pre>
+
+        <button onClick={() => {
+          localStorage.removeItem("wasLoggedIn");
+          auth.removeUser();
+        }}>Sign out</button>
       </div>
     );
   }
 
   return (
-    <div className="app-container login">
-      <div className="login-panel">
-        <h1>Text Summarization App</h1>
-        <p>Please sign in to use the text summarizer</p>
-        <button className="auth-button login" onClick={() => auth.signinRedirect()}>Sign in</button>
-      </div>
+    <div>
+      <button onClick={() => auth.signinRedirect()}>Sign in</button>
+      <button onClick={() => signOutRedirect()}>Sign out</button>
     </div>
   );
 }

@@ -3,12 +3,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { AuthProvider } from "react-oidc-context";
-import { USER_POOL_ID, AWS_REGION, USER_POOL_CLIENT_ID, REDIRECT_URI } from "./config";
 
 const cognitoAuthConfig = {
-  authority: `https://cognito-idp.${AWS_REGION}.amazonaws.com/${USER_POOL_ID}`,
-  client_id: USER_POOL_CLIENT_ID,
-  redirect_uri: REDIRECT_URI,
+  authority: "https://cognito-idp.eu-north-1.amazonaws.com/eu-north-1_O4CIZM2aJ",
+  client_id: "46g5ig1s03klm5guub0h4qkv2e",
+  redirect_uri: "https://d3cuf8vpsz3a8w.cloudfront.net/",
   response_type: "code",
   scope: "email openid phone profile",
   // Add the following configurations to properly handle refresh
